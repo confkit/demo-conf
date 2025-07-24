@@ -1,0 +1,36 @@
+version: 1.0.0
+
+engine: docker
+
+engine_compose:
+  # engine group name(default: confkit)
+  # project: confkit
+  file: ./confkit-compose.yml
+
+spaces:
+  - name: hello
+    description: "Hello ConfKit"
+    path: .confkit/spaces/hello
+  - name: demo-go
+    description: "go demo"
+    path: .confkit/spaces/demo-go
+  - name: demo-rust
+    description: "rust demo"
+    path: .confkit/spaces/demo-rust
+
+images:
+  - name: hello-builder
+    base_image: alpine
+    tag: 3.18
+    context: volumes/context
+    engine_file: ./.confkit/images/Dockerfile.alpine:3.18
+  - name: rust-builder
+    base_image: rust
+    tag: 1.88-alpine
+    context: volumes/context
+    engine_file: ./.confkit/images/Dockerfile.rust.1.88-alpine
+  - name: go-builder
+    base_image: golang
+    tag: 1.24-alpine
+    context: volumes/context
+    engine_file: ./.confkit/images/Dockerfile.golang:1.24-alpine
