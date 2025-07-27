@@ -1,0 +1,39 @@
+name: "rust-server"
+description: "Rust Server demo"
+
+source:
+  git_repo: "git@github.com:confkit/demo-rust.git"
+  git_branch: "main"
+
+environment:
+  # 自定义环境变量（基于内置变量）
+  BUILD_TARGET_DIR: "target/release"
+
+cleaner:
+  workspace: false
+  artifacts: false
+
+steps:
+- name: "克隆项目"
+  commands:
+  - "echo '🔍 克隆项目'"
+  - "git clone ${GIT_REPO} -b main ${PROJECT_NAME}"
+
+- name: "代码检查"
+  container: "rust-builder-1.88"
+  working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
+  commands:
+  - "cargo fmt --check"
+  - "cargo clippy --all-targets --all-features -- -D warnings"
+
+- name: "构建应用"
+  container: "rust-builder-1.88"
+  working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
+  commands:
+  - "cargo build --release"
+
+- name: "搬运构建产物"
+  container: "rust-builder-1.88"
+  working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
+  commands:
+  - "cp ${BUILD_TARGET_DIR}/demo-rust ${CONTAINER_ARTIFACTS_DIR}"

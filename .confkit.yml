@@ -28,7 +28,7 @@ images:
     base_image: rust
     tag: 1.88-alpine
     context: volumes/context
-    engine_file: ./.confkit/images/Dockerfile.rust.1.88-alpine
+    engine_file: ./.confkit/images/Dockerfile.rust:1.88-alpine
   - name: go-builder
     base_image: golang
     tag: 1.24-alpine

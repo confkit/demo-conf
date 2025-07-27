@@ -20,9 +20,7 @@ services:
     volumes:
       - ./volumes/workspace:/workspace
       - ./volumes/artifacts:/artifacts
-      - ./volumes/cache/rust-builder-1.88:/usr/local/cargo
     working_dir: /workspace
-    command: tail -f /dev/null
     labels:
       - "builder.type=rust"
       - "builder.version=1.88"
@@ -35,9 +33,7 @@ services:
     volumes:
       - ./volumes/workspace:/workspace
       - ./volumes/artifacts:/artifacts
-      - ./volumes/cache/golang-1.24:/go/pkg
     working_dir: /workspace
-    command: tail -f /dev/null
     labels:
       - "builder.type=golang"
       - "builder.version=1.24"
