@@ -28,6 +28,9 @@ RUN mkdir -p /tmp/downloads && \
     chmod +x /usr/local/bin/golangci-lint && \
     rm -rf /tmp/downloads
 
+# 安装 task
+RUN go install github.com/go-task/task/v3/cmd/task@latest
+
 # 创建缓存目录
 RUN mkdir -p /go/pkg /artifacts
 

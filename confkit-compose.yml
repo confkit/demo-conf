@@ -14,11 +14,12 @@ services:
       - "builder.status=ready"
 
   rust-builder-1.88:
-    image: rust-builder-1.88:1.88-alpine
+    image: rust-builder:1.88-alpine
     container_name: rust-builder-1.88
     restart: unless-stopped
     volumes:
       - ./volumes/workspace:/workspace
+      - ./volumes/artifacts:/artifacts
       - ./volumes/cache/rust-builder-1.88:/usr/local/cargo
     working_dir: /workspace
     command: tail -f /dev/null
@@ -27,12 +28,13 @@ services:
       - "builder.version=1.88"
       - "builder.status=ready"
 
-  golang-builder-1.24:
-    image: go-builder:1.24
+  go-builder-1.24:
+    image: go-builder:1.24-alpine
     container_name: go-builder-1.24
     restart: unless-stopped
     volumes:
       - ./volumes/workspace:/workspace
+      - ./volumes/artifacts:/artifacts
       - ./volumes/cache/golang-1.24:/go/pkg
     working_dir: /workspace
     command: tail -f /dev/null
@@ -44,7 +46,7 @@ services:
 volumes:
   rust-cache-1.88:
   hello-cache-3.18:
-  golang-cache-1.24:
+  go-cache-1.24:
   # node-cache-22:
   # tauri-cache-latest-cargo:
   # tauri-cache-latest-npm:
