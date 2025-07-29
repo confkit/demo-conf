@@ -9,7 +9,9 @@ RUN apk add --no-cache \
     bash \
     make \
     gcc \
+    libc-dev \
     musl-dev \
+    pkgconfig \
     coreutils
 
 # 配置 ll 别名（写入 bashrc）
@@ -25,5 +27,7 @@ RUN mkdir -p /root/.cargo \
     && echo 'replace-with = "rsproxy"' >> /root/.cargo/config \
     && echo '[source.rsproxy]' >> /root/.cargo/config \
     && echo 'registry = "https://rsproxy.cn/crates.io-index"' >> /root/.cargo/config
+
+RUN cargo install cargo-make
 
 CMD ["tail", "-f", "/dev/null"]
