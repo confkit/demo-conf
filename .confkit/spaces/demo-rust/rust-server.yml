@@ -4,6 +4,8 @@ description: "Rust Server demo"
 source:
   git_repo: "git@github.com:confkit/demo-rust.git"
   git_branch: "main"
+  language: "rust"
+  manifest_file: "Cargo.toml"
 
 environment:
   # 自定义环境变量（基于内置变量）
@@ -37,3 +39,46 @@ steps:
   working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
   commands:
   - "cp ${BUILD_TARGET_DIR}/demo-rust ${CONTAINER_ARTIFACTS_DIR}"
+
+- name: "准备发布环境"
+  container: "rust-builder-1.88"
+  commands:
+  - "echo ' 准备发布 Rust Server v${PROJECT_VERSION}'"
+  - "echo 'Git Hash: ${GIT_HASH}'"
+  - "echo 'Build Date: $(date -Iseconds)'"
+  - "echo 'Task ID: ${TASK_ID}'"
+
+- name: "创建 Release Notes"
+  working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
+  commands:
+  - "echo 📝 创建 Release Notes"
+  - "echo \"### 🏗️ Build Info\" >> RELEASE_NOTES.md"
+  - "echo - **Version**: v${PROJECT_VERSION} >> RELEASE_NOTES.md"
+  - "echo - **Git Hash**: ${GIT_HASH} >> RELEASE_NOTES.md"
+  - "echo - **Build Time**: $(date -Iseconds) >> RELEASE_NOTES.md" 
+  - "echo - **Task ID**: ${TASK_ID} >> RELEASE_NOTES.md"
+  - "echo '' >> RELEASE_NOTES.md"
+
+- name: "追加 Release Notes"
+  working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
+  commands:
+  - "git cliff -o - --latest >> RELEASE_NOTES.md"
+
+- name: "发布到 GitHub Releases"
+  working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
+  commands:
+  - "echo '📦 发布到 GitHub Releases'"
+  - "gh release create v${PROJECT_VERSION} --title \"Rust Server Demo v${PROJECT_VERSION}\" --notes-file RELEASE_NOTES.md --draft"
+  - "gh release upload v${PROJECT_VERSION} ./target/release/demo-rust --clobber"
+  - "gh release edit v${PROJECT_VERSION} --draft=false"
+  - "echo '✅ GitHub Release 创建完成: https://github.com/confkit/demo-rust/releases/tag/v${PROJECT_VERSION}'"
+  continue_on_error: true
+  timeout: "5m"
+
+- name: "验证发布结果"
+  commands:
+  - "echo '🔍 验证发布结果'"
+  - "gh release view v${PROJECT_VERSION} --json assets"
+  - "echo '✅ 发布验证完成'"
+  continue_on_error: true
+  timeout: "2m"

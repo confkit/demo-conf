@@ -4,10 +4,17 @@ description: "Hello ConfKit"
 source:
   git_repo: "https://github.com/confkit/engine.git"
   git_branch: "main"
+  language: "rust"
+  manifest_file: "Cargo.toml"
 
 environment:
   NODE_ENV: "production"
   NPM_CONFIG_REGISTRY: "https://registry.npmmirror.com"
+
+cleaner:
+  # workspace: false
+  artifacts: false
+
 steps:
 - name: "代码拉取"
   commands:
@@ -41,15 +48,14 @@ steps:
   working_dir: "${CONTAINER_ARTIFACTS_DIR}"
   commands:
   - "echo 'build hello confkit'"
-  - "echo \"{\\\"project\\\":\\\"${PROJECT_NAME}\\\",\\\"version\\\":\\\"${GIT_BRANCH:-main}\\\
-    \",\\\"git_hash\\\":\\\"${GIT_HASH}\\\",\\\"build_time\\\":\\\"$(date -Iseconds)\\\
-    \",\\\"task_id\\\":\\\"${TASK_ID}\\\"}\" > build-info.json"
-
-- name: "清理临时文件"
-  container: "hello-builder-3.18"
-  commands:
-      # - "rm -rf /workspace/${PROJECT_NAME}-${TASK_ID}"
-      # - "rm -rf /artifacts/${PROJECT_NAME}-${TASK_ID}"
+  - "echo { > build-info.json"
+  - "echo   \\\"project\\\": \\\"${PROJECT_NAME}\\\", >> build-info.json"
+  - "echo   \\\"version\\\": \\\"${PROJECT_VERSION}\\\", >> build-info.json"
+  - "echo   \\\"git_hash\\\": \\\"${GIT_HASH}\\\", >> build-info.json"
+  - "echo   \\\"git_branch\\\": \\\"${GIT_BRANCH}\\\", >> build-info.json"
+  - "echo   \\\"build_time\\\": \\\"$(date -Iseconds)\\\", >> build-info.json"
+  - "echo   \\\"task_id\\\": \\\"${TASK_ID}\\\" >> build-info.json"
+  - "echo } >> build-info.json"
 
 step_options:
   retry: 2
