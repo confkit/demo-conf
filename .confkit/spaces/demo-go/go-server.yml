@@ -9,26 +9,20 @@ environment:
   BUILD_TARGET_DIR: "bin"
 
 cleaner:
-#   workspace: false
-  artifacts: false
+  workspace: false
 
 steps:
-- name: "克隆项目"
-  commands:
-  - "git clone ${GIT_REPO} -b main ${PROJECT_NAME}"
+  - name: "克隆项目"
+    commands:
+      - "git clone ${GIT_REPO} -b main ${PROJECT_NAME}"
+      - "rm -rf ${PROJECT_NAME}/.git"
 
-- name: "代码检查"
-  container: "go-builder-1.24"
-  commands:
-  - "cd ${PROJECT_NAME} && task lint"
+  - name: "代码检查"
+    container: "go-builder-1.24"
+    commands:
+      - "cd ${PROJECT_NAME} && task lint"
 
-- name: "构建应用"
-  container: "go-builder-1.24"
-  commands:
-  - "cd ${PROJECT_NAME} && task build --force"
-
-- name: "搬运构建产物"
-  container: "go-builder-1.24"
-  commands:
-  - "cp -r ${PROJECT_NAME}/${BUILD_TARGET_DIR}/* ${CONTAINER_ARTIFACTS_DIR}"
-
+  - name: "构建应用"
+    container: "go-builder-1.24"
+    commands:
+      - "cd ${PROJECT_NAME} && task build --force"
