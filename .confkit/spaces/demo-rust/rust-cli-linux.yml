@@ -1,4 +1,4 @@
-name: "rust-server"
+name: "rust-cli-linux"
 description: "Rust Server demo"
 
 source:
@@ -26,11 +26,6 @@ steps:
     commands:
       - "cargo fmt --check"
       - "cargo clippy --all-targets --all-features -- -D warnings"
-
-  - name: "构建应用(macos)"
-    working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
-    commands:
-      - "cargo make build-macos"
 
   - name: "构建应用(linux.aarch64)"
     container: "rust-builder-1.88"
@@ -65,21 +60,18 @@ steps:
   - name: "重命名二进制文件"
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
-      - "cp ./target/aarch64-apple-darwin/release/demo-rust ./target/demo-rust-aarch64-apple-darwin"
-      - "cp ./target/x86_64-apple-darwin/release/demo-rust ./target/demo-rust-x86_64-apple-darwin"
       - "cp ./target/aarch64-unknown-linux-gnu/release/demo-rust ./target/demo-rust-aarch64-unknown-linux-gnu"
+      - "cp ./target/x86_64-unknown-linux-gnu/release/demo-rust ./target/demo-rust-x86_64-unknown-linux-gnu"
 
   - name: "发布到 GitHub Releases"
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
       - "echo '📦 发布到 GitHub Releases'"
       - 'gh release create v${PROJECT_VERSION} --title "Rust Server Demo v${PROJECT_VERSION}" --notes-file RELEASE_NOTES.md --draft'
-      - "echo '📤 上传 macOS ARM64 版本...'"
-      - "gh release upload v${PROJECT_VERSION} ./target/demo-rust-aarch64-apple-darwin --clobber"
-      - "echo '📤 上传 macOS x86_64 版本...'"
-      - "gh release upload v${PROJECT_VERSION} ./target/demo-rust-x86_64-apple-darwin --clobber"
       - "echo '📤 上传 Linux ARM64 版本...'"
       - "gh release upload v${PROJECT_VERSION} ./target/demo-rust-aarch64-unknown-linux-gnu --clobber"
+      - "echo '📤 上传 Linux x86_64 版本...'"
+      - "gh release upload v${PROJECT_VERSION} ./target/demo-rust-x86_64-unknown-linux-gnu --clobber"
       - "gh release edit v${PROJECT_VERSION} --draft=false"
       - "echo '✅ GitHub Release 创建完成: https://github.com/confkit/demo-rust/releases/tag/v${PROJECT_VERSION}'"
     continue_on_error: true
