@@ -31,7 +31,7 @@ steps:
     container: "rust-builder-1.88"
     working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
-      - "cargo make build-aarch64-unknown-linux-gnu"
+      - "cargo make build-linux"
 
   - name: "准备发布环境"
     container: "rust-builder-1.88"
