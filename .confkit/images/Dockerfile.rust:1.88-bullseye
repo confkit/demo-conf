@@ -2,6 +2,8 @@ FROM rust:1.88-bullseye
 
 RUN rustup component add clippy rustfmt
 
+# 支持 arm64 架构包
+RUN dpkg --add-architecture arm64
 # 修复包名和网络问题
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends
