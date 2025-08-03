@@ -32,6 +32,8 @@ steps:
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
       - "cargo make build-macos"
+      - "cp ./target/aarch64-apple-darwin/release/demo-rust ./target/demo-rust-aarch64-apple-darwin"
+      - "cp ./target/x86_64-apple-darwin/release/demo-rust ./target/demo-rust-x86_64-apple-darwin"
 
   - name: "准备发布环境"
     container: "rust-builder-1.88"
