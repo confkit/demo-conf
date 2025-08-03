@@ -75,4 +75,4 @@ steps:
 
   - name: "执行 linux 流水线"
     commands:
-      - ssh xiaoyown@10.14.206.32 "cd ~/projects/confkit/demo-conf && ../engine/debug/target/confkit run --space demo-rust --project rust-cli-linux"
+      - ssh xiaoyown@10.14.206.32 "cd ~/projects/confkit/demo-conf && ../engine/target/release/confkit run --space demo-rust --project rust-cli-linux --hide-level"
