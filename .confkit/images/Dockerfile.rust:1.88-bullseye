@@ -1,6 +1,5 @@
 FROM rust:1.88-bullseye
 
-RUN rustup component add clippy rustfmt
 
 # 支持 arm64 架构包
 RUN dpkg --add-architecture arm64
@@ -17,6 +16,8 @@ RUN apt-get install -y gcc-aarch64-linux-gnu
 RUN apt-get install -y libc6-dev:arm64
 RUN apt-get install -y pkg-config
 RUN apt-get install -y coreutils
+RUN apt-get install -y vim
+RUN apt-get install -y git
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 
@@ -24,7 +25,7 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN echo "alias ll='ls -alF --color=auto'" >> /etc/profile.d/aliases.sh \
     && echo "alias ls='ls --color=auto'" >> /etc/profile.d/aliases.sh
 
-WORKDIR /workspace
+RUN rustup component add clippy rustfmt
 
 # Cargo 镜像代理
 RUN mkdir -p /root/.cargo && \
@@ -35,5 +36,7 @@ RUN mkdir -p /root/.cargo && \
 
 RUN cargo install cargo-make
 RUN cargo install cross
+
+WORKDIR /workspace
 
 CMD ["tail", "-f", "/dev/null"]
