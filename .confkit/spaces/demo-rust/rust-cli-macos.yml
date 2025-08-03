@@ -36,7 +36,7 @@ steps:
   - name: "准备发布环境"
     container: "rust-builder-1.88"
     commands:
-      - "echo ' 准备发布 Rust Server v${PROJECT_VERSION}'"
+      - "echo ' 准备发布 Rust Server v${PROJECT_VERSION} 并创建 GitHub Release'"
       - "echo 'Git Hash: ${GIT_HASH}'"
       - "echo 'Build Date: $(date -Iseconds)'"
       - "echo 'Task ID: ${TASK_ID}'"
@@ -44,30 +44,20 @@ steps:
   - name: "创建 Release Notes"
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
-      - "echo 📝 创建 Release Notes"
-      - 'echo "### 🏗️ Build Info" >> RELEASE_NOTES.md'
-      - "echo - **Version**: v${PROJECT_VERSION} >> RELEASE_NOTES.md"
-      - "echo - **Git Hash**: ${GIT_HASH} >> RELEASE_NOTES.md"
-      - "echo - **Build Time**: $(date -Iseconds) >> RELEASE_NOTES.md"
-      - "echo - **Task ID**: ${TASK_ID} >> RELEASE_NOTES.md"
+      - "echo '📝 创建 Release Notes'"
+      - 'echo "### 🏗️ Build Info" > RELEASE_NOTES.md'
+      - "echo '- **Version**: v${PROJECT_VERSION}' >> RELEASE_NOTES.md"
+      - "echo '- **Git Hash**: ${GIT_HASH}' >> RELEASE_NOTES.md"
+      - "echo '- **Build Time**: $(date -Iseconds)' >> RELEASE_NOTES.md"
+      - "echo '- **Task ID**: ${TASK_ID}' >> RELEASE_NOTES.md"
       - "echo '' >> RELEASE_NOTES.md"
-
-  - name: "追加 Release Notes"
-    working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
-    commands:
       - "git cliff -o - --latest >> RELEASE_NOTES.md"
 
-  - name: "重命名二进制文件"
+  - name: "创建 GitHub Release 并上传 macOS 构建文件"
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
-      - "cp ./target/aarch64-apple-darwin/release/demo-rust ./target/demo-rust-aarch64-apple-darwin"
-      - "cp ./target/x86_64-apple-darwin/release/demo-rust ./target/demo-rust-x86_64-apple-darwin"
-
-  - name: "发布到 GitHub Releases"
-    working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
-    commands:
-      - "echo '📦 发布到 GitHub Releases'"
-      - 'gh release create v${PROJECT_VERSION} --title "Rust Server Demo v${PROJECT_VERSION}" --notes-file RELEASE_NOTES.md --draft'
+      - "echo '📦 创建 GitHub Release...'"
+      - "gh release create v${PROJECT_VERSION} --title \"Rust Server Demo v${PROJECT_VERSION}\" --notes-file RELEASE_NOTES.md --draft"
       - "echo '📤 上传 macOS ARM64 版本...'"
       - "gh release upload v${PROJECT_VERSION} ./target/demo-rust-aarch64-apple-darwin --clobber"
       - "echo '📤 上传 macOS x86_64 版本...'"
@@ -76,15 +66,6 @@ steps:
       - "echo '✅ GitHub Release 创建完成: https://github.com/confkit/demo-rust/releases/tag/v${PROJECT_VERSION}'"
     continue_on_error: true
     timeout: "5m"
-
-  - name: "验证发布结果"
-    working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
-    commands:
-      - "echo '🔍 验证发布结果'"
-      - "gh release view v${PROJECT_VERSION} --json assets"
-      - "echo '✅ 发布验证完成'"
-    continue_on_error: true
-    timeout: "2m"
 
   - name: "移除 .git 目录"
     commands:

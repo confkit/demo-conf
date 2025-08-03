@@ -39,38 +39,19 @@ steps:
   - name: "准备发布环境"
     container: "rust-builder-1.88"
     commands:
-      - "echo ' 准备发布 Rust Server v${PROJECT_VERSION}'"
+      - "echo ' 准备上传 Linux 构建文件到 GitHub Release v${PROJECT_VERSION}'"
       - "echo 'Git Hash: ${GIT_HASH}'"
       - "echo 'Build Date: $(date -Iseconds)'"
       - "echo 'Task ID: ${TASK_ID}'"
 
-  - name: "创建 Release Notes"
+  - name: "上传文件到 GitHub Release"
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
-      - "echo 📝 创建 Release Notes"
-      - 'echo "### 🏗️ Build Info" >> RELEASE_NOTES.md'
-      - "echo - **Version**: v${PROJECT_VERSION} >> RELEASE_NOTES.md"
-      - "echo - **Git Hash**: ${GIT_HASH} >> RELEASE_NOTES.md"
-      - "echo - **Build Time**: $(date -Iseconds) >> RELEASE_NOTES.md"
-      - "echo - **Task ID**: ${TASK_ID} >> RELEASE_NOTES.md"
-      - "echo '' >> RELEASE_NOTES.md"
-
-  - name: "追加 Release Notes"
-    working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
-    commands:
-      - "git cliff -o - --latest >> RELEASE_NOTES.md"
-
-  - name: "发布到 GitHub Releases"
-    working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
-    commands:
-      - "echo '📦 发布到 GitHub Releases'"
-      - 'gh release create v${PROJECT_VERSION} --title "Rust Server Demo v${PROJECT_VERSION}" --notes-file RELEASE_NOTES.md --draft'
       - "echo '📤 上传 Linux ARM64 版本...'"
       - "gh release upload v${PROJECT_VERSION} ./target/demo-rust-aarch64-unknown-linux-gnu --clobber"
       - "echo '📤 上传 Linux x86_64 版本...'"
       - "gh release upload v${PROJECT_VERSION} ./target/demo-rust-x86_64-unknown-linux-gnu --clobber"
-      - "gh release edit v${PROJECT_VERSION} --draft=false"
-      - "echo '✅ GitHub Release 创建完成: https://github.com/confkit/demo-rust/releases/tag/v${PROJECT_VERSION}'"
+      - "echo '✅ 文件上传完成'"
     continue_on_error: true
     timeout: "5m"
 
