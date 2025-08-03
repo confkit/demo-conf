@@ -19,6 +19,7 @@ steps:
     commands:
       - "echo '🔍 克隆项目'"
       - "git clone ${GIT_REPO} -b main ${PROJECT_NAME}"
+      - "chmod -R 777 ${PROJECT_NAME}"
 
   - name: "代码检查"
     container: "rust-builder-1.88"

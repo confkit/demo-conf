@@ -19,6 +19,7 @@ steps:
     commands:
       - "echo '🔍 克隆项目'"
       - "git clone ${GIT_REPO} -b main ${PROJECT_NAME}"
+      - "chmod -R 777 ${PROJECT_NAME}"
 
   - name: "代码检查"
     container: "rust-builder-1.88"
@@ -32,6 +33,8 @@ steps:
     working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
       - "cargo make build-linux"
+      - "cp ./target/aarch64-unknown-linux-gnu/release/demo-rust ./target/demo-rust-aarch64-unknown-linux-gnu"
+      - "cp ./target/x86_64-unknown-linux-gnu/release/demo-rust ./target/demo-rust-x86_64-unknown-linux-gnu"
 
   - name: "准备发布环境"
     container: "rust-builder-1.88"
@@ -56,12 +59,6 @@ steps:
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
       - "git cliff -o - --latest >> RELEASE_NOTES.md"
-
-  - name: "重命名二进制文件"
-    working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
-    commands:
-      - "cp ./target/aarch64-unknown-linux-gnu/release/demo-rust ./target/demo-rust-aarch64-unknown-linux-gnu"
-      - "cp ./target/x86_64-unknown-linux-gnu/release/demo-rust ./target/demo-rust-x86_64-unknown-linux-gnu"
 
   - name: "发布到 GitHub Releases"
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
