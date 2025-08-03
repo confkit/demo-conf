@@ -17,7 +17,7 @@ cleaner:
 steps:
   - name: "克隆项目"
     commands:
-      - "echo '🔍 克隆项目'"
+      - "echo 克隆项目"
       - "git clone ${GIT_REPO} -b main ${PROJECT_NAME}"
       - "chmod -R 777 ${PROJECT_NAME}"
 
@@ -45,28 +45,28 @@ steps:
   - name: "准备发布环境"
     container: "rust-builder-1.88"
     commands:
-      - "echo ' 准备上传 Linux 构建文件到 GitHub Release v${PROJECT_VERSION}'"
-      - "echo 'Git Hash: ${GIT_HASH}'"
-      - "echo 'Build Date: $(date -Iseconds)'"
-      - "echo 'Task ID: ${TASK_ID}'"
+      - "echo 准备上传 Linux 构建文件到 GitHub Release v${PROJECT_VERSION}"
+      - "echo Git Hash: ${GIT_HASH}"
+      - "echo Build Date: $(date -Iseconds)"
+      - "echo Task ID: ${TASK_ID}"
 
   - name: "上传文件到 GitHub Release"
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
-      - "echo '📤 上传 Linux ARM64 版本...'"
+      - "echo 📤 上传 Linux ARM64 版本..."
       - "gh release upload v${PROJECT_VERSION} ./target/demo-rust-aarch64-unknown-linux-gnu --clobber"
-      - "echo '📤 上传 Linux x86_64 版本...'"
+      - "echo 📤 上传 Linux x86_64 版本..."
       - "gh release upload v${PROJECT_VERSION} ./target/demo-rust-x86_64-unknown-linux-gnu --clobber"
-      - "echo '✅ 文件上传完成'"
+      - "echo ✅ 文件上传完成"
     continue_on_error: true
     timeout: "5m"
 
   - name: "验证发布结果"
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
-      - "echo '🔍 验证发布结果'"
+      - "echo 验证发布结果"
       - "gh release view v${PROJECT_VERSION} --json assets"
-      - "echo '✅ 发布验证完成'"
+      - "echo ✅ 发布验证完成"
     continue_on_error: true
     timeout: "2m"
 
