@@ -72,3 +72,7 @@ steps:
   - name: "移除 .git 目录"
     commands:
       - "rm -rf ${PROJECT_NAME}/.git"
+
+  - name: "执行 linux 流水线"
+    commands:
+      - ssh xiaoyown@10.14.206.32 "cd ~/projects/confkit/demo-conf && ../engine/debug/target/confkit run --space demo-rust --project rust-cli-linux"
