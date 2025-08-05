@@ -22,7 +22,7 @@ steps:
       - "chmod -R 777 ${PROJECT_NAME}"
 
   - name: "代码检查"
-    container: "rust-builder-1.88"
+    container: "demo-rust-builder-1.88"
     working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
       - "cargo fmt --check"
@@ -36,7 +36,7 @@ steps:
       - "cp ./target/x86_64-apple-darwin/release/demo-rust ./target/demo-rust-x86_64-apple-darwin"
 
   - name: "准备发布环境"
-    container: "rust-builder-1.88"
+    container: "demo-rust-builder-1.88"
     commands:
       - "echo 准备发布 Rust Server v${PROJECT_VERSION} 并创建 GitHub Release"
       - "echo Git Hash: ${GIT_HASH}"

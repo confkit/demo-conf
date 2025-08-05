@@ -12,7 +12,7 @@ environment:
 steps:
   # 1. 环境准备和代码检查
   - name: "准备发布环境"
-    container: "rust-builder-1.88"
+    container: "demo-rust-builder-1.88"
     working_dir: "/workspace"
     commands:
       - "echo '🚀 开始 ConfKit v$RELEASE_VERSION 发布流程'"

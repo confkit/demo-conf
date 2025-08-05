@@ -22,14 +22,14 @@ steps:
       - "chmod -R 777 ${PROJECT_NAME}"
 
   - name: "代码检查"
-    container: "rust-builder-1.88"
+    container: "demo-rust-builder-1.88"
     working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
       - "cargo fmt --check"
       - "cargo clippy --all-targets --all-features -- -D warnings"
 
   - name: "构建应用(linux.aarch64)"
-    container: "rust-builder-1.88"
+    container: "demo-rust-builder-1.88"
     working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
       - "cargo make build-linux"
@@ -43,7 +43,7 @@ steps:
       - "chmod 644 ./target/demo-rust-*"
 
   - name: "准备发布环境"
-    container: "rust-builder-1.88"
+    container: "demo-rust-builder-1.88"
     commands:
       - "echo 准备上传 Linux 构建文件到 GitHub Release v${PROJECT_VERSION}"
       - "echo Git Hash: ${GIT_HASH}"

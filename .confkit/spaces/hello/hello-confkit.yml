@@ -23,28 +23,27 @@ steps:
     timeout: "3m"
 
   - name: "安装依赖"
-    container:
-      "hello-builder-3.18"
+    container: "demo-hello-builder-3.18"
     commands:
       - "echo 'hello world'"
       - "echo Hello, ${PROJECT_NAME} > step-2.txt"
 
   - name: "代码检查"
-    container: "hello-builder-3.18"
+    container: "demo-hello-builder-3.18"
     working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
       - "echo 'check hello confkit' > step-3.txt"
     continue_on_error: true
 
   - name: "运行测试"
-    container: "hello-builder-3.18"
+    container: "demo-hello-builder-3.18"
     working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
     commands:
       - "echo 'test hello confkit' > step-4.txt"
     parallel_group: "quality"
 
   - name: "构建应用"
-    container: "hello-builder-3.18"
+    container: "demo-hello-builder-3.18"
     commands:
       - "echo 'build hello confkit'"
       - "echo { > build-info.json"

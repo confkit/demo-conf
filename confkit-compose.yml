@@ -1,7 +1,7 @@
 services:
-  hello-builder-3.18:
+  demo-hello-builder-3.18:
     image: hello-builder:3.18
-    container_name: hello-builder-3.18
+    container_name: demo-hello-builder-3.18
     restart: unless-stopped
     network_mode: "host"
     volumes:
@@ -13,25 +13,25 @@ services:
       - "builder.version=linux"
       - "builder.status=ready"
 
-  rust-builder-1.88:
+  demo-rust-builder-1.88:
     image: rust-builder:1.88-bullseye
-    container_name: rust-builder-1.88
+    container_name: demo-rust-builder-1.88
     restart: unless-stopped
     network_mode: "host"
     volumes:
       - ./volumes/workspace:/workspace
-      - ./volumes/cache/rust-builder-1.88/registry:/root/.cargo/registry
-      - ./volumes/cache/rust-builder-1.88/git:/root/.cargo/git
-      - ./volumes/cache/rust-builder-1.88/bin:/root/.cargo/bin
+      - ./volumes/cache/demo-rust-builder-1.88/registry:/root/.cargo/registry
+      - ./volumes/cache/demo-rust-builder-1.88/git:/root/.cargo/git
+      - ./volumes/cache/demo-rust-builder-1.88/bin:/root/.cargo/bin
     working_dir: /workspace
     labels:
       - "builder.type=rust"
       - "builder.version=1.88"
       - "builder.status=ready"
 
-  go-builder-1.24:
+  demo-go-builder-1.24:
     image: go-builder:1.24-alpine
-    container_name: go-builder-1.24
+    container_name: demo-go-builder-1.24
     restart: unless-stopped
     network_mode: "host"
     volumes:
@@ -43,9 +43,9 @@ services:
       - "builder.status=ready"
 
 volumes:
-  rust-cache-1.88:
-  hello-cache-3.18:
-  go-cache-1.24:
+  demo-rust-cache-1.88:
+  demo-hello-cache-3.18:
+  demo-go-cache-1.24:
   # node-cache-22:
   # tauri-cache-latest-cargo:
   # tauri-cache-latest-npm:

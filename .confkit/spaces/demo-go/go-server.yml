@@ -18,11 +18,11 @@ steps:
       - "rm -rf ${PROJECT_NAME}/.git"
 
   - name: "代码检查"
-    container: "go-builder-1.24"
+    container: "demo-go-builder-1.24"
     commands:
       - "cd ${PROJECT_NAME} && task lint"
 
   - name: "构建应用"
-    container: "go-builder-1.24"
+    container: "demo-go-builder-1.24"
     commands:
       - "cd ${PROJECT_NAME} && task build --force"

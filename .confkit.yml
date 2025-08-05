@@ -4,7 +4,7 @@ engine: docker
 
 engine_compose:
   # engine group name(default: confkit)
-  # project: confkit
+  project: confkit-demo
   file: ./confkit-compose.yml
 
 spaces:
