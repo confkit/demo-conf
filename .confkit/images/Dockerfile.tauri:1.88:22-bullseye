@@ -1,0 +1,148 @@
+FROM rust:1.88-bullseye
+
+# 使用国内 APT 镜像
+RUN sed -i 's|http://deb.debian.org/debian|https://mirrors.ustc.edu.cn/debian|g' /etc/apt/sources.list && \
+    sed -i 's|http://security.debian.org/debian-security|https://mirrors.ustc.edu.cn/debian-security|g' /etc/apt/sources.list
+
+# 设置 rustup 镜像
+ENV RUSTUP_DIST_SERVER="https://mirrors.ustc.edu.cn/rust-static"
+ENV RUSTUP_UPDATE_ROOT="https://mirrors.ustc.edu.cn/rust-static/rustup"
+# ENV RUSTUP_DIST_SERVER=https://rsproxy.cn
+# ENV RUSTUP_UPDATE_ROOT=https://rsproxy.cn/rustup
+
+# Cargo 镜像代理
+RUN mkdir -p ~/.cargo && \
+    echo '[source.crates-io]' > ~/.cargo/config.toml && \
+    echo 'replace-with = "rsproxy"' >> ~/.cargo/config.toml && \
+    echo '[source.rsproxy]' >> ~/.cargo/config.toml && \
+    echo 'registry = "https://mirrors.ustc.edu.cn/crates.io-index"' >> ~/.cargo/config.toml
+# echo 'registry = "https://rsproxy.cn/crates.io-index"' >> ~/.cargo/config.toml
+
+RUN rustup component add clippy rustfmt
+
+RUN cargo install cargo-make
+RUN cargo install git-cliff
+RUN cargo install cross
+
+# 支持 arm64 架构包
+RUN dpkg --add-architecture arm64
+
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends curl
+RUN apt-get install -y --no-install-recommends wget
+RUN apt-get install -y --no-install-recommends bash
+RUN apt-get install -y --no-install-recommends make
+RUN apt-get install -y --no-install-recommends gcc
+RUN apt-get install -y --no-install-recommends libc6-dev
+RUN apt-get install -y --no-install-recommends pkg-config
+RUN apt-get install -y --no-install-recommends coreutils
+RUN apt-get install -y --no-install-recommends vim
+RUN apt-get install -y --no-install-recommends git
+RUN apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu
+RUN apt-get install -y --no-install-recommends libc6-dev:arm64
+RUN apt-get clean
+RUN rm -rf /var/lib/apt/lists/*
+
+# Node
+
+RUN groupadd --gid 1000 node \
+    && useradd --uid 1000 --gid node --shell /bin/bash --create-home node
+
+ENV NODE_VERSION 22.18.0
+
+RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
+    && case "${dpkgArch##*-}" in \
+    amd64) ARCH='x64';; \
+    ppc64el) ARCH='ppc64le';; \
+    s390x) ARCH='s390x';; \
+    arm64) ARCH='arm64';; \
+    armhf) ARCH='armv7l';; \
+    i386) ARCH='x86';; \
+    *) echo "unsupported architecture"; exit 1 ;; \
+    esac \
+    # use pre-existing gpg directory, see https://github.com/nodejs/docker-node/pull/1895#issuecomment-1550389150
+    && export GNUPGHOME="$(mktemp -d)" \
+    # gpg keys listed at https://github.com/nodejs/node#release-keys
+    && set -ex \
+    && for key in \
+    5BE8A3F6C8A5C01D106C0AD820B1A390B168D356 \
+    DD792F5973C6DE52C432CBDAC77ABFA00DDBF2B7 \
+    CC68F5A3106FF448322E48ED27F5E38D5B0A215F \
+    8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
+    890C08DB8579162FEE0DF9DB8BEAB4DFCF555EF4 \
+    C82FA3AE1CBEDC6BE46B9360C43CEC45C17AB93C \
+    108F52B48DB57BB0CC439B2997B01419BD92F80A \
+    A363A499291CBBC940DD62E41F10027AF002F8B0 \
+    ; do \
+    { gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$key" && gpg --batch --fingerprint "$key"; } || \
+    { gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key" && gpg --batch --fingerprint "$key"; } ; \
+    done \
+    && curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$ARCH.tar.xz" \
+    && curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
+    && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
+    && gpgconf --kill all \
+    && rm -rf "$GNUPGHOME" \
+    && grep " node-v$NODE_VERSION-linux-$ARCH.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
+    && tar -xJf "node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
+    && rm "node-v$NODE_VERSION-linux-$ARCH.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt \
+    && ln -s /usr/local/bin/node /usr/local/bin/nodejs \
+    # smoke tests
+    && node --version \
+    && npm --version \
+    && rm -rf /tmp/*
+
+ENV YARN_VERSION 1.22.22
+
+RUN set -ex \
+    # use pre-existing gpg directory, see https://github.com/nodejs/docker-node/pull/1895#issuecomment-1550389150
+    && export GNUPGHOME="$(mktemp -d)" \
+    && for key in \
+    6A010C5166006599AA17F08146C2130DFD2497F5 \
+    ; do \
+    { gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$key" && gpg --batch --fingerprint "$key"; } || \
+    { gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key" && gpg --batch --fingerprint "$key"; } ; \
+    done \
+    && curl -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
+    && curl -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz.asc" \
+    && gpg --batch --verify yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz \
+    && gpgconf --kill all \
+    && rm -rf "$GNUPGHOME" \
+    && mkdir -p /opt \
+    && tar -xzf yarn-v$YARN_VERSION.tar.gz -C /opt/ \
+    && ln -s /opt/yarn-v$YARN_VERSION/bin/yarn /usr/local/bin/yarn \
+    && ln -s /opt/yarn-v$YARN_VERSION/bin/yarnpkg /usr/local/bin/yarnpkg \
+    && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz \
+    # smoke test
+    && yarn --version \
+    && rm -rf /tmp/*
+
+ENV PNPM_VERSION=10.9.0
+
+# 配置默认终端
+RUN export SHELL=/bin/bash
+
+RUN npm i -g corepack@latest
+
+# 启用并使用 corepack 安装 pnpm
+RUN corepack enable \
+    && corepack use pnpm@${PNPM_VERSION}
+
+# 设置 pnpm 配置
+RUN mkdir -p /root/.pnpm-store \
+    && pnpm config set store-dir /root/.pnpm-store \
+    && pnpm config set global-bin-dir /usr/local/bin \
+    && pnpm config set global-dir /usr/local/pnpm \
+    && corepack use pnpm@${PNPM_VERSION}
+
+# 验证安装
+RUN node --version \
+    && npm --version \
+    && pnpm --version
+
+# 设置 alias
+RUN echo "alias ll='ls -alF --color=auto'" >> /etc/profile.d/aliases.sh \
+    && echo "alias ls='ls --color=auto'" >> /etc/profile.d/aliases.sh
+
+WORKDIR /workspace
+
+CMD ["tail", "-f", "/dev/null"]

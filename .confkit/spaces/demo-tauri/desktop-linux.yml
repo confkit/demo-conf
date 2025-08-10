@@ -1,5 +1,5 @@
-name: "tauri-desktop-maos"
-description: "Tauri Desktop demo (macos)"
+name: "tauri-desktop-linux"
+description: "Tauri Desktop demo (linux)"
 
 source:
   git_repo: "git@gitee.com:confkit/demo-tauri.git"
@@ -25,17 +25,19 @@ steps:
       - "git clone ${GIT_REPO} -b main ${PROJECT_NAME}"
       - "chmod -R 777 ${PROJECT_NAME}"
 
-  - name: "构建应用 web (macos)"
-    working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}/client/web-app"
+  - name: "构建应用 web (linux)"
+    container: "demo-tauri-builder-1.88"
+    working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}/client/web-app"
     commands:
       - "pnpm install"
       - "pnpm run build"
 
-  - name: "构建应用 desktop (macos)"
-    working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}/client/desktop"
+  - name: "构建应用 desktop (linux)"
+    container: "demo-tauri-builder-1.88"
+    working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}/client/desktop"
     commands:
       - "pnpm check"
-      - "pnpm run build:macos"
+      - "pnpm run build:linux"
 
   # - name: "准备发布环境"
   #   commands:

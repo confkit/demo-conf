@@ -1,0 +1,28 @@
+FROM node:22-alpine
+
+ENV PNPM_VERSION=10.9.0
+
+# 配置默认终端
+RUN export SHELL=/bin/bash
+
+RUN npm i -g corepack@latest
+
+# 启用并使用 corepack 安装 pnpm
+RUN corepack enable \
+    && corepack use pnpm@${PNPM_VERSION}
+
+# 设置 pnpm 配置
+RUN mkdir -p /root/.pnpm-store \
+    && pnpm config set store-dir /root/.pnpm-store \
+    && pnpm config set global-bin-dir /usr/local/bin \
+    && pnpm config set global-dir /usr/local/pnpm \
+    && corepack use pnpm@${PNPM_VERSION}
+
+# 验证安装
+RUN node --version \
+    && npm --version \
+    && pnpm --version
+
+WORKDIR /workspace
+
+CMD ["tail", "-f", "/dev/null"]

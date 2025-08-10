@@ -17,6 +17,9 @@ spaces:
   - name: demo-rust
     description: "rust demo"
     path: .confkit/spaces/demo-rust
+  - name: demo-tauri
+    description: "tauri demo"
+    path: .confkit/spaces/demo-tauri
 
 images:
   - name: hello-builder
@@ -24,11 +27,24 @@ images:
     tag: 3.18
     context: volumes/context
     engine_file: ./.confkit/images/Dockerfile.alpine:3.18
+  # rust builder 镜像
   - name: rust-builder
     base_image: rust
     tag: 1.88-bullseye
     context: volumes/context
     engine_file: ./.confkit/images/Dockerfile.rust:1.88-bullseye
+  - name: tauri-builder
+    base_image: rust
+    tag: 1.88-bullseye
+    context: volumes/context
+    engine_file: ./.confkit/images/Dockerfile.tauri:1.88:22-bullseye
+  # node builder 镜像
+  - name: node-builder
+    base_image: node
+    tag: 22-alpine
+    context: volumes/context
+    engine_file: ./.confkit/images/Dockerfile.node:22-alpine
+  # go builder 镜像
   - name: go-builder
     base_image: golang
     tag: 1.24-alpine

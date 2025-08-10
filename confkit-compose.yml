@@ -29,6 +29,19 @@ services:
       - "builder.version=1.88"
       - "builder.status=ready"
 
+  demo-node-builder-22:
+    image: node-builder:22-alpine
+    container_name: demo-node-builder-22
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - ./volumes/workspace:/workspace
+    working_dir: /workspace
+    labels:
+      - "builder.type=node"
+      - "builder.version=22"
+      - "builder.status=ready"
+
   demo-go-builder-1.24:
     image: go-builder:1.24-alpine
     container_name: demo-go-builder-1.24
