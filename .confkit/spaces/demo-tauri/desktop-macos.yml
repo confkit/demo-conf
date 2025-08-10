@@ -1,16 +1,20 @@
-name: "tauri-desktop-maos"
+name: "tauri-desktop-macos"
 description: "Tauri Desktop demo (macos)"
 
 source:
-  git_repo: "git@gitee.com:confkit/demo-tauri.git"
+  git_repo: "git@github.com:confkit/demo-tauri.git"
   git_branch: "main"
   language: "rust"
   manifest_file: "client/desktop/src-tauri/Cargo.toml"
 
 environment:
-  # 自定义环境变量（基于内置变量）
-  # BUILD_TARGET_DIR: "target/release"
-  BUILD_EXECUTE_DIR: "client/desktop"
+  RUST_SRC_DIR: "client/desktop/src-tauri"
+  # arm 架构 dmg 文件
+  ARM_DMG_FILE: "target/aarch64-apple-darwin/release/bundle/dmg/demo-tauri_0.1.0_aarch64.dmg"
+  # x86 架构 dmg 文件
+  X86_DMG_FILE: "target/x86_64-apple-darwin/release/bundle/dmg/demo-tauri_0.1.0_x86_64.dmg"
+  # 通用 dmg 文件
+  UNIVERSAL_DMG_FILE: "target/universal-apple-darwin/release/bundle/dmg/demo-tauri_0.1.0_universal.dmg"
 
 cleaner:
   workspace: false
@@ -35,40 +39,55 @@ steps:
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}/client/desktop"
     commands:
       - "pnpm check"
-      - "pnpm run build:macos"
+      - "pnpm run build:macos:arm64"
 
-  # - name: "准备发布环境"
-  #   commands:
-  #     - "echo 准备发布 Rust Server v${PROJECT_VERSION} 并创建 GitHub Release"
-  #     - "echo Git Hash: ${GIT_HASH}"
-  #     - "echo Build Date: $(date -Iseconds)"
-  #     - "echo Task ID: ${TASK_ID}"
+  - name: "准备发布环境"
+    commands:
+      - "echo 准备发布 Rust Server v${PROJECT_VERSION} 并创建 GitHub Release"
+      - "echo Git Hash: ${GIT_HASH}"
+      - "echo Build Date: $(date -Iseconds)"
+      - "echo Task ID: ${TASK_ID}"
 
-  # - name: "创建 Release Notes"
+  - name: "创建 Release Notes"
+    working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}/client/desktop/src-tauri"
+    commands:
+      - "echo '📝 创建 Release Notes'"
+      - "echo '### 🏗️ Build Info' > RELEASE_NOTES.md"
+      - "echo - **Version**: v${PROJECT_VERSION} >> RELEASE_NOTES.md"
+      - "echo - **Git Hash**: ${GIT_HASH} >> RELEASE_NOTES.md"
+      - "echo - **Build Time**: $(date -Iseconds) >> RELEASE_NOTES.md"
+      - "echo - **Task ID**: ${TASK_ID} >> RELEASE_NOTES.md"
+      - "echo '' >> RELEASE_NOTES.md"
+      - "git cliff -o - --latest >> RELEASE_NOTES.md"
+
+  # - name: "创建 Gitee Release 并上传 macOS 构建文件"
   #   working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
   #   commands:
-  #     - "echo '📝 创建 Release Notes'"
-  #     - "echo '### 🏗️ Build Info' > RELEASE_NOTES.md"
-  #     - "echo - **Version**: v${PROJECT_VERSION} >> RELEASE_NOTES.md"
-  #     - "echo - **Git Hash**: ${GIT_HASH} >> RELEASE_NOTES.md"
-  #     - "echo - **Build Time**: $(date -Iseconds) >> RELEASE_NOTES.md"
-  #     - "echo - **Task ID**: ${TASK_ID} >> RELEASE_NOTES.md"
-  #     - "echo '' >> RELEASE_NOTES.md"
-  #     - "git cliff -o - --latest >> RELEASE_NOTES.md"
+  #     - "echo '📦 创建 Gitee Release...'"
+  #     - "gitee-release create v${PROJECT_VERSION} -m \"Tauri Desktop v${PROJECT_VERSION}\" -d \"$(cat client/desktop/src-tauri/RELEASE_NOTES.md | tr '\n' ' ')\""
+  #     - "echo '📤 上传 macOS 版本...'"
+  #     - "gitee-release upload v${PROJECT_VERSION} ${ARM_DMG_FILE} -n 'demo-tauri-aarch64.dmg'"
+  #     - "gitee-release upload v${PROJECT_VERSION} ${X86_DMG_FILE} -n 'demo-tauri-x86_64.dmg'"
+  #     - "gitee-release upload v${PROJECT_VERSION} ${UNIVERSAL_DMG_FILE} -n 'demo-tauri-universal.dmg'"
+  #     - "echo '✅ Gitee Release 创建完成: https://gitee.com/confkit/demo-tauri/releases/v${PROJECT_VERSION}'"
+  #   timeout: "10m"
 
-  # - name: "创建 GitHub Release 并上传 macOS 构建文件"
-  #   working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}"
-  #   commands:
-  #     - "echo '📦 创建 GitHub Release...'"
-  #     - 'gh release create v${PROJECT_VERSION} --title "Rust Server Demo v${PROJECT_VERSION}" --notes-file RELEASE_NOTES.md --draft'
-  #     - "echo '📤 上传 macOS ARM64 版本...'"
-  #     - "gh release upload v${PROJECT_VERSION} ./target/demo-rust-aarch64-apple-darwin --clobber"
-  #     - "echo '📤 上传 macOS x86_64 版本...'"
-  #     - "gh release upload v${PROJECT_VERSION} ./target/demo-rust-x86_64-apple-darwin --clobber"
-  #     - "gh release edit v${PROJECT_VERSION} --draft=false"
-  #     - "echo '✅ GitHub Release 创建完成: https://github.com/confkit/demo-rust/releases/tag/v${PROJECT_VERSION}'"
-  #   continue_on_error: true
-  #   timeout: "5m"
+  - name: "创建 GitHub Release 并上传 macOS 构建文件"
+    working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}/${RUST_SRC_DIR}"
+    commands:
+      - "echo '📦 创建 GitHub Release...'"
+      - 'gh release create v${PROJECT_VERSION} --title "Tauri Desktop Demo v${PROJECT_VERSION}" --notes-file RELEASE_NOTES.md --draft'
+      - "echo '📤 上传 macOS ARM64 版本...'"
+      # 上传 arm64 dmg 文件
+      - "gh release upload v${PROJECT_VERSION} ${ARM_DMG_FILE} --clobber"
+      # - "echo '📤 上传 macOS x86_64 版本...'"
+      # - "gh release upload v${PROJECT_VERSION} ${X86_DMG_FILE} --clobber"
+      # - "echo '📤 上传 macOS universal 版本...'"
+      # - "gh release upload v${PROJECT_VERSION} ${UNIVERSAL_DMG_FILE} --clobber"
+      - "gh release edit v${PROJECT_VERSION} --draft=false"
+      - "echo '✅ GitHub Release 创建完成: https://github.com/confkit/demo-tauri/releases/tag/v${PROJECT_VERSION}'"
+    continue_on_error: true
+    timeout: "5m"
 
   # - name: "移除 .git 目录"
   #   commands:
