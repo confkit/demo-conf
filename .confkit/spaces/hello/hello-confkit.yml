@@ -11,8 +11,8 @@ environment:
   NODE_ENV: "production"
   NPM_CONFIG_REGISTRY: "https://registry.npmmirror.com"
 
-cleaner:
-  workspace: false
+# cleaner:
+#   workspace: false
 
 steps:
   - name: "代码拉取"
@@ -20,7 +20,7 @@ steps:
       - "git clone ${GIT_REPO} ${PROJECT_NAME}"
       - "chmod -R 777 ${PROJECT_NAME}"
       - "rm -rf ${PROJECT_NAME}/.git"
-    timeout: "3m"
+    timeout: 180
 
   - name: "安装依赖"
     container: "demo-hello-builder-3.18"
@@ -54,7 +54,8 @@ steps:
       - "echo   \\\"build_time\\\": \\\"$(date -Iseconds)\\\", >> build-info.json"
       - "echo   \\\"task_id\\\": \\\"${TASK_ID}\\\" >> build-info.json"
       - "echo } >> build-info.json"
+      - "cat build-info.json"
 
 step_options:
   retry: 2
-  timeout: "15m"
+  timeout: 900

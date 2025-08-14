@@ -70,7 +70,7 @@ steps:
   #     - "gitee-release upload v${PROJECT_VERSION} ${X86_DMG_FILE} -n 'demo-tauri-x86_64.dmg'"
   #     - "gitee-release upload v${PROJECT_VERSION} ${UNIVERSAL_DMG_FILE} -n 'demo-tauri-universal.dmg'"
   #     - "echo '✅ Gitee Release 创建完成: https://gitee.com/confkit/demo-tauri/releases/v${PROJECT_VERSION}'"
-  #   timeout: "10m"
+  #   timeout: 600
 
   - name: "创建 GitHub Release 并上传 macOS 构建文件"
     working_dir: "${HOST_WORKSPACE_DIR}/${PROJECT_NAME}/${RUST_SRC_DIR}"
@@ -87,7 +87,7 @@ steps:
       - "gh release edit v${PROJECT_VERSION} --draft=false"
       - "echo '✅ GitHub Release 创建完成: https://github.com/confkit/demo-tauri/releases/tag/v${PROJECT_VERSION}'"
     continue_on_error: true
-    timeout: "5m"
+    timeout: 300
 
   # - name: "移除 .git 目录"
   #   commands:

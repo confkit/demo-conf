@@ -65,7 +65,7 @@ steps:
   #     - "gh release edit v${PROJECT_VERSION} --draft=false"
   #     - "echo '✅ GitHub Release 创建完成: https://github.com/confkit/demo-rust/releases/tag/v${PROJECT_VERSION}'"
   #   continue_on_error: true
-  #   timeout: "5m"
+  #   timeout: 300
 
   # - name: "执行 linux 流水线"
   #   commands:
