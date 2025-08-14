@@ -7,14 +7,54 @@ source:
   language: "rust"
   manifest_file: "Cargo.toml"
 
+# environment_files:
+#   - "./.confkit/environments/hello.yml"
+#   - "./.confkit/environments/hello.env"
+
 environment:
   NODE_ENV: "production"
   NPM_CONFIG_REGISTRY: "https://registry.npmmirror.com"
+
+# 自定义交互模式环境变量
+environment_from_args:
+  - name: "OSS_URL"
+    # 交互方式(input/radio/checkbox)
+    type: "input"
+    # 交互提示
+    prompt: "请输入OSS URL"
+    # 默认值
+    default: "hello-confkit"
+    # 是否必填
+    required: true
+
+  - name: "BUILD_PACKAGE"
+    type: "radio"
+    prompt: "请选择构建包"
+    default: "hello-confkit"
+    required: true
+    options:
+      - "hello-confkit"
+      - "hello-confkit-full"
+
+  - name: "BUILD_TYPE"
+    type: "checkbox"
+    prompt: "请选择构建类型"
+    default: "debug"
+    required: true
+    options:
+      - "debug"
+      - "release"
 
 # cleaner:
 #   workspace: false
 
 steps:
+  - name: "打印来自参数环境变量"
+    commands:
+      - "echo ${OSS_URL}"
+      - "echo ${BUILD_PACKAGE}"
+      - "echo ${BUILD_TYPE}"
+
   - name: "代码拉取"
     commands:
       - "git clone ${GIT_REPO} ${PROJECT_NAME}"
