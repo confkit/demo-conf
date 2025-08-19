@@ -4,8 +4,8 @@ description: "Hello ConfKit"
 source:
   git_repo: "https://github.com/confkit/engine.git"
   git_branch: "main"
-  language: "rust"
-  manifest_file: "Cargo.toml"
+  # language: "rust"
+  # manifest_file: "Cargo.toml"
 
 # environment_files:
 #   - "./.confkit/environments/hello.yml"
@@ -18,7 +18,7 @@ environment:
 # 自定义交互模式环境变量
 environment_from_args:
   - name: "OSS_URL"
-    # 交互方式(input/radio/checkbox)
+    # 交互方式(input/radio/checkbox/confirm)
     type: "input"
     # 交互提示
     prompt: "请输入OSS URL"
@@ -45,6 +45,12 @@ environment_from_args:
       - "debug"
       - "release"
 
+  - name: "ENABLE_CACHE"
+    type: "confirm"
+    prompt: "是否启用构建缓存?"
+    default: "true"
+    required: false
+
 # cleaner:
 #   workspace: false
 
@@ -54,6 +60,7 @@ steps:
       - "echo ${OSS_URL}"
       - "echo ${BUILD_PACKAGE}"
       - "echo ${BUILD_TYPE}"
+      - "echo ${ENABLE_CACHE}"
 
   - name: "代码拉取"
     commands:
