@@ -17,91 +17,106 @@ environment:
 
 # 自定义交互模式环境变量
 environment_from_args:
-  - name: "OSS_URL"
-    # 交互方式(input/radio/checkbox/confirm)
-    type: "input"
-    # 交互提示
-    prompt: "请输入OSS URL"
-    # 默认值
-    default: "hello-confkit"
-    # 是否必填
-    required: true
-
-  - name: "BUILD_PACKAGE"
-    type: "radio"
-    prompt: "请选择构建包"
-    default: "hello-confkit"
-    required: true
-    options:
-      - "hello-confkit"
-      - "hello-confkit-full"
-
-  - name: "BUILD_TYPE"
-    type: "checkbox"
-    prompt: "请选择构建类型"
-    default: "debug"
-    required: true
-    options:
-      - "debug"
-      - "release"
-
   - name: "ENABLE_CACHE"
     type: "confirm"
     prompt: "是否启用构建缓存?"
     default: "true"
     required: false
 
+  - name: "OSS_URL"
+    # 交互方式(input/radio/checkbox/confirm)
+    type: "input"
+    # 交互提示
+    prompt: "请输入OSS URL"
+    # 默认值
+    default: "https://*.*.*.*"
+    # 是否必填
+    required: false
+    #
+    condition: "${ENABLE_CACHE} == true"
+
+  - name: "BUILD_PACKAGE"
+    type: "radio"
+    prompt: "请选择构建包"
+    default: "hello-confkit"
+    required: false
+    options:
+      - "hello-confkit"
+      - "hello-confkit-full"
+    #
+    condition: "${ENABLE_CACHE} == false"
+
+  - name: "BUILD_TYPE"
+    type: "checkbox"
+    prompt: "请选择构建类型"
+    default: "debug"
+    required: false
+    options:
+      - "debug"
+      - "release"
+
 # cleaner:
 #   workspace: false
 
 steps:
-  - name: "打印来自参数环境变量"
+  - name: 启动构建缓存
     commands:
-      - "echo ${OSS_URL}"
-      - "echo ${BUILD_PACKAGE}"
-      - "echo ${BUILD_TYPE}"
-      - "echo ${ENABLE_CACHE}"
+      - echo "* ENABLE_CACHE = ${ENABLE_CACHE}"
+    condition: "${ENABLE_CACHE} == true"
 
-  - name: "代码拉取"
+  - name: 关闭构建缓存
     commands:
-      - "git clone ${GIT_REPO} ${PROJECT_NAME}"
-      - "chmod -R 777 ${PROJECT_NAME}"
-      - "rm -rf ${PROJECT_NAME}/.git"
-    timeout: 180
+      - echo "* ENABLE_CACHE = ${ENABLE_CACHE}"
+    condition: "${ENABLE_CACHE} == false"
 
-  - name: "安装依赖"
-    container: "demo-hello-builder-3.18"
-    commands:
-      - "echo 'hello world'"
-      - "echo Hello, ${PROJECT_NAME} > step-2.txt"
+  ## 正常流程测试
+  # - name: "打印来自参数环境变量"
+  #   commands:
+  #     - "echo ${OSS_URL}"
+  #     - "echo ${BUILD_PACKAGE}"
+  #     - "echo ${BUILD_TYPE}"
+  #     - "echo ${ENABLE_CACHE}"
 
-  - name: "代码检查"
-    container: "demo-hello-builder-3.18"
-    working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
-    commands:
-      - "echo 'check hello confkit' > step-3.txt"
-    continue_on_error: true
+  # - name: "代码拉取"
+  #   commands:
+  #     - "git clone ${GIT_REPO} ${PROJECT_NAME}"
+  #     - "chmod -R 777 ${PROJECT_NAME}"
+  #     - "rm -rf ${PROJECT_NAME}/.git"
+  #   timeout: 180
 
-  - name: "运行测试"
-    container: "demo-hello-builder-3.18"
-    working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
-    commands:
-      - "echo 'test hello confkit' > step-4.txt"
-    parallel_group: "quality"
+  # - name: "安装依赖"
+  #   container: "demo-hello-builder-3.18"
+  #   commands:
+  #     - "echo 'hello world'"
+  #     - "echo Hello, ${PROJECT_NAME} > step-2.txt"
 
-  - name: "构建应用"
-    container: "demo-hello-builder-3.18"
-    commands:
-      - "echo 'build hello confkit'"
-      - "echo { > build-info.json"
-      - "echo   \\\"project\\\": \\\"${PROJECT_NAME}\\\", >> build-info.json"
-      - "echo   \\\"version\\\": \\\"${PROJECT_VERSION}\\\", >> build-info.json"
-      - "echo   \\\"git_hash\\\": \\\"${GIT_HASH}\\\", >> build-info.json"
-      - "echo   \\\"git_branch\\\": \\\"${GIT_BRANCH}\\\", >> build-info.json"
-      - "echo   \\\"build_time\\\": \\\"$(date -Iseconds)\\\", >> build-info.json"
-      - "echo   \\\"task_id\\\": \\\"${TASK_ID}\\\" >> build-info.json"
-      - "echo } >> build-info.json"
-      - "cat build-info.json"
+  # - name: "代码检查"
+  #   container: "demo-hello-builder-3.18"
+  #   working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
+  #   commands:
+  #     - "echo 'check hello confkit' > step-3.txt"
+  #   continue_on_error: true
+
+  # - name: "运行测试"
+  #   container: "demo-hello-builder-3.18"
+  #   working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
+  #   commands:
+  #     - "echo 'test hello confkit' > step-4.txt"
+  #   parallel_group: "quality"
+
+  # - name: "构建应用"
+  #   container: "demo-hello-builder-3.18"
+  #   commands:
+  #     - "echo 'build hello confkit'"
+  #     - "echo { > build-info.json"
+  #     - "echo   \\\"project\\\": \\\"${PROJECT_NAME}\\\", >> build-info.json"
+  #     - "echo   \\\"version\\\": \\\"${PROJECT_VERSION}\\\", >> build-info.json"
+  #     - "echo   \\\"git_hash\\\": \\\"${GIT_HASH}\\\", >> build-info.json"
+  #     - "echo   \\\"git_branch\\\": \\\"${GIT_BRANCH}\\\", >> build-info.json"
+  #     - "echo   \\\"build_time\\\": \\\"$(date -Iseconds)\\\", >> build-info.json"
+  #     - "echo   \\\"task_id\\\": \\\"${TASK_ID}\\\" >> build-info.json"
+  #     - "echo } >> build-info.json"
+  #     - "cat build-info.json"
 
 step_options:
   retry: 2
