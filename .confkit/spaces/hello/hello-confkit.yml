@@ -2,8 +2,8 @@ name: "hello-confkit"
 description: "Hello ConfKit"
 
 source:
-  git_repo: "https://github.com/confkit/engine.git"
-  git_branch: "main"
+  # git_repo: "https://github.com/confkit/engine.git"
+  # git_branch: "main"
   # language: "rust"
   # manifest_file: "Cargo.toml"
 
@@ -61,62 +61,65 @@ environment_from_args:
 steps:
   - name: 启动构建缓存
     commands:
-      - echo "* ENABLE_CACHE = ${ENABLE_CACHE}"
-    condition: "${ENABLE_CACHE} == true"
+      - "echo '===================== * 步骤 1'"
+      - "sleep 3"
+      - "echo ${OSS_URL}"
+      - "echo ${BUILD_PACKAGE}"
+      - "echo ${BUILD_TYPE}"
+      - "echo ${ENABLE_CACHE}"
 
   - name: 关闭构建缓存
     commands:
-      - echo "* ENABLE_CACHE = ${ENABLE_CACHE}"
-    condition: "${ENABLE_CACHE} == false"
+      - "echo '===================== * 步骤 2'"
+      - "sleep 3"
+      # - "git clone ${GIT_REPO} ${PROJECT_NAME}"
+      # - "chmod -R 777 ${PROJECT_NAME}"
+      # - "rm -rf ${PROJECT_NAME}/.git"
+      - "echo 'git clone code' > step-1.txt"
+    timeout: 180
+    continue_on_error: true
 
-  ## 正常流程测试
-  # - name: "打印来自参数环境变量"
-  #   commands:
-  #     - "echo ${OSS_URL}"
-  #     - "echo ${BUILD_PACKAGE}"
-  #     - "echo ${BUILD_TYPE}"
-  #     - "echo ${ENABLE_CACHE}"
+  - name: "安装依赖"
+    # container: "demo-hello-builder-3.18"
+    commands:
+      - "echo '===================== * 步骤 3'"
+      - "sleep 3"
+      - "echo 'hello world'"
+      - "echo Hello, ${PROJECT_NAME} > step-2.txt"
 
-  # - name: "代码拉取"
-  #   commands:
-  #     - "git clone ${GIT_REPO} ${PROJECT_NAME}"
-  #     - "chmod -R 777 ${PROJECT_NAME}"
-  #     - "rm -rf ${PROJECT_NAME}/.git"
-  #   timeout: 180
+  - name: "代码检查"
+    # container: "demo-hello-builder-3.18"
+    # working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
+    commands:
+      - "echo '===================== * 步骤 4'"
+      - "sleep 3"
+      - "echo 'check hello confkit' > step-3.txt"
+    continue_on_error: true
 
-  # - name: "安装依赖"
-  #   container: "demo-hello-builder-3.18"
-  #   commands:
-  #     - "echo 'hello world'"
-  #     - "echo Hello, ${PROJECT_NAME} > step-2.txt"
+  - name: "运行测试"
+    # container: "demo-hello-builder-3.18"
+    # working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
+    commands:
+      - "echo '===================== * 步骤 5'"
+      - "sleep 3"
+      - "echo 'test hello confkit' > step-4.txt"
+    parallel_group: "quality"
 
-  # - name: "代码检查"
-  #   container: "demo-hello-builder-3.18"
-  #   working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
-  #   commands:
-  #     - "echo 'check hello confkit' > step-3.txt"
-  #   continue_on_error: true
-
-  # - name: "运行测试"
-  #   container: "demo-hello-builder-3.18"
-  #   working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
-  #   commands:
-  #     - "echo 'test hello confkit' > step-4.txt"
-  #   parallel_group: "quality"
-
-  # - name: "构建应用"
-  #   container: "demo-hello-builder-3.18"
-  #   commands:
-  #     - "echo 'build hello confkit'"
-  #     - "echo { > build-info.json"
-  #     - "echo   \\\"project\\\": \\\"${PROJECT_NAME}\\\", >> build-info.json"
-  #     - "echo   \\\"version\\\": \\\"${PROJECT_VERSION}\\\", >> build-info.json"
-  #     - "echo   \\\"git_hash\\\": \\\"${GIT_HASH}\\\", >> build-info.json"
-  #     - "echo   \\\"git_branch\\\": \\\"${GIT_BRANCH}\\\", >> build-info.json"
-  #     - "echo   \\\"build_time\\\": \\\"$(date -Iseconds)\\\", >> build-info.json"
-  #     - "echo   \\\"task_id\\\": \\\"${TASK_ID}\\\" >> build-info.json"
-  #     - "echo } >> build-info.json"
-  #     - "cat build-info.json"
+  - name: "构建应用"
+    # container: "demo-hello-builder-3.18"
+    commands:
+      - "echo '===================== * 步骤 6'"
+      - "sleep 3"
+      - "echo 'build hello confkit'"
+      - "echo { > build-info.json"
+      - "echo   \\\"project\\\": \\\"${PROJECT_NAME}\\\", >> build-info.json"
+      - "echo   \\\"version\\\": \\\"${PROJECT_VERSION}\\\", >> build-info.json"
+      - "echo   \\\"git_hash\\\": \\\"${GIT_HASH}\\\", >> build-info.json"
+      - "echo   \\\"git_branch\\\": \\\"${GIT_BRANCH}\\\", >> build-info.json"
+      - "echo   \\\"build_time\\\": \\\"$(date -Iseconds)\\\", >> build-info.json"
+      - "echo   \\\"task_id\\\": \\\"${TASK_ID}\\\" >> build-info.json"
+      - "echo } >> build-info.json"
+      - "cat build-info.json"
 
 step_options:
   retry: 2
