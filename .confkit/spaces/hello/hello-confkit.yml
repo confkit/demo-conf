@@ -55,14 +55,14 @@ environment_from_args:
       - "debug"
       - "release"
 
-# cleaner:
-#   workspace: false
+cleaner:
+  workspace: false
 
 steps:
   - name: 启动构建缓存
     commands:
       - "echo '===================== * 步骤 1'"
-      - "sleep 3"
+      - "sleep 2"
       - "echo ${OSS_URL}"
       - "echo ${BUILD_PACKAGE}"
       - "echo ${BUILD_TYPE}"
@@ -71,7 +71,7 @@ steps:
   - name: 关闭构建缓存
     commands:
       - "echo '===================== * 步骤 2'"
-      - "sleep 3"
+      - "sleep 2"
       # - "git clone ${GIT_REPO} ${PROJECT_NAME}"
       # - "chmod -R 777 ${PROJECT_NAME}"
       # - "rm -rf ${PROJECT_NAME}/.git"
@@ -80,36 +80,37 @@ steps:
     continue_on_error: true
 
   - name: "安装依赖"
-    # container: "demo-hello-builder-3.18"
+    container: "demo-hello-builder-3.18"
     commands:
       - "echo '===================== * 步骤 3'"
-      - "sleep 3"
+      - "sleep 2"
       - "echo 'hello world'"
       - "echo Hello, ${PROJECT_NAME} > step-2.txt"
 
   - name: "代码检查"
-    # container: "demo-hello-builder-3.18"
-    # working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
+    container: "demo-hello-builder-3.18"
+    working_dir: "${CONTAINER_WORKSPACE_DIR}"
     commands:
       - "echo '===================== * 步骤 4'"
-      - "sleep 3"
+      - "sleep 2"
       - "echo 'check hello confkit' > step-3.txt"
+      - "echo ${CONTAINER_WORKSPACE_DIR} > step-3.txt"
     continue_on_error: true
 
   - name: "运行测试"
-    # container: "demo-hello-builder-3.18"
-    # working_dir: "${CONTAINER_WORKSPACE_DIR}/${PROJECT_NAME}"
+    container: "demo-hello-builder-3.18"
+    working_dir: "${CONTAINER_WORKSPACE_DIR}"
     commands:
       - "echo '===================== * 步骤 5'"
-      - "sleep 3"
+      - "sleep 2"
       - "echo 'test hello confkit' > step-4.txt"
     parallel_group: "quality"
 
   - name: "构建应用"
-    # container: "demo-hello-builder-3.18"
+    container: "demo-hello-builder-3.18"
     commands:
       - "echo '===================== * 步骤 6'"
-      - "sleep 3"
+      - "sleep 2"
       - "echo 'build hello confkit'"
       - "echo { > build-info.json"
       - "echo   \\\"project\\\": \\\"${PROJECT_NAME}\\\", >> build-info.json"

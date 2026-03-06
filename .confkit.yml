@@ -1,6 +1,6 @@
 version: 1.0.0
 
-engine: docker
+engine: podman
 
 engine_compose:
   # engine group name(default: confkit)
